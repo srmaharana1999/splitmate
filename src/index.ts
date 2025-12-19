@@ -24,7 +24,7 @@ app.use("/api/balances", balanceRoutes);
 app.use("/api/settlements", settlementRoutes);
 
 // Health check
-app.get("/health", (req, res) => {
+app.get("/health", (_req, res) => {
   res.json({ status: "ok", message: "Expense Sharing API is running" });
 });
 

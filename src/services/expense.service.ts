@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { GroupMember, Prisma, User } from "@prisma/client";
 import { AppError } from "../utils/errors";
 import prisma from "../prisma";
 
@@ -32,14 +32,16 @@ export class ExpenseService {
     }
 
     // Validate payer is a member
-    const payerIsMember = group.members.some((m) => m.userId === paidBy);
+    const payerIsMember = group.members.some(
+      (m: GroupMember) => m.userId === paidBy
+    );
     if (!payerIsMember) {
       throw new AppError("Payer must be a member of the group", 400);
     }
 
     // Validate all split users are members
-    const memberIds = group.members.map((m) => m.userId);
-    const allSplitsAreMembers = splits.every((s) =>
+    const memberIds = group.members.map((m: GroupMember) => m.userId);
+    const allSplitsAreMembers = splits.every((s: SplitDetail) =>
       memberIds.includes(s.userId)
     );
     if (!allSplitsAreMembers) {
@@ -50,7 +52,10 @@ export class ExpenseService {
     const calculatedSplits = this.calculateSplits(splitType, amount, splits);
 
     // Validate total
-    const total = calculatedSplits.reduce((sum, s) => sum + s.amount, 0);
+    const total = calculatedSplits.reduce(
+      (sum: number, s: SplitDetail) => sum + s.amount,
+      0
+    );
     if (Math.abs(total - amount) > 0.01) {
       throw new AppError(
         `Split amounts (${total}) must equal total amount (${amount})`,
@@ -67,7 +72,7 @@ export class ExpenseService {
         description,
         splitType,
         splits: {
-          create: calculatedSplits.map((s) => ({
+          create: calculatedSplits.map((s: SplitDetail) => ({
             userId: s.userId,
             amount: new Prisma.Decimal(s.amount),
             percentage: s.percentage ? new Prisma.Decimal(s.percentage) : null,
@@ -107,40 +112,40 @@ export class ExpenseService {
     switch (splitType) {
       case "EQUAL": {
         const amountPerPerson = totalAmount / splits.length;
-        return splits.map((s) => ({
+        return splits.map((s: SplitDetail) => ({
           userId: s.userId,
           amount: Math.round(amountPerPerson * 100) / 100,
         }));
       }
 
       case "EXACT": {
-        if (splits.some((s) => s.amount === undefined)) {
+        if (splits.some((s: SplitDetail) => s.amount === undefined)) {
           throw new AppError(
             "All splits must have amount for EXACT split type",
             400
           );
         }
-        return splits.map((s) => ({
+        return splits.map((s: SplitDetail) => ({
           userId: s.userId,
           amount: s.amount!,
         }));
       }
 
       case "PERCENTAGE": {
-        if (splits.some((s) => s.percentage === undefined)) {
+        if (splits.some((s: SplitDetail) => s.percentage === undefined)) {
           throw new AppError(
             "All splits must have percentage for PERCENTAGE split type",
             400
           );
         }
         const totalPercentage = splits.reduce(
-          (sum, s) => sum + (s.percentage || 0),
+          (sum: number, s: SplitDetail) => sum + (s.percentage || 0),
           0
         );
         if (Math.abs(totalPercentage - 100) > 0.01) {
           throw new AppError("Percentages must add up to 100", 400);
         }
-        return splits.map((s) => ({
+        return splits.map((s: SplitDetail) => ({
           userId: s.userId,
           amount: Math.round(((totalAmount * s.percentage!) / 100) * 100) / 100,
           percentage: s.percentage,

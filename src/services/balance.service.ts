@@ -1,3 +1,4 @@
+import { GroupMember } from "@prisma/client";
 import prisma from "../prisma";
 import { AppError } from "../utils/errors";
 
@@ -30,7 +31,7 @@ export class BalanceService {
       throw new AppError("User not found", 404);
     }
 
-    const groupIds = user.groupMembers.map((gm) => gm.groupId);
+    const groupIds = user.groupMembers.map((gm: GroupMember) => gm.groupId);
     const balances = [];
 
     for (const groupId of groupIds) {
@@ -110,8 +111,8 @@ export class BalanceService {
       }
     }
 
-    const totalOwes = owes.reduce((sum, b) => sum + b.amount, 0);
-    const totalOwedBy = owedBy.reduce((sum, b) => sum + b.amount, 0);
+    const totalOwes = owes.reduce((sum, b: Balance) => sum + b.amount, 0);
+    const totalOwedBy = owedBy.reduce((sum, b: Balance) => sum + b.amount, 0);
 
     return {
       groupId,
@@ -143,7 +144,7 @@ export class BalanceService {
     // Process expenses
     for (const expense of expenses) {
       const paidBy = expense.paidBy;
-      const totalAmount = Number(expense.amount);
+      // const totalAmount = Number(expense.amount);
 
       for (const split of expense.splits) {
         const userId = split.userId;
