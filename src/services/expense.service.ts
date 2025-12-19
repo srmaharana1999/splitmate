@@ -1,4 +1,5 @@
-import { GroupMember, Prisma, User } from "@prisma/client";
+import type { GroupMember } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { AppError } from "../utils/errors";
 import prisma from "../prisma";
 

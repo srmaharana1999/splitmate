@@ -1,3 +1,4 @@
+import type { GroupMember } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { AppError } from "../utils/errors";
 import prisma from "../prisma";
@@ -24,7 +25,7 @@ export class SettlementService {
     }
 
     // Validate both users are members
-    const memberIds = group.members.map((m) => m.userId);
+    const memberIds = group.members.map((m: GroupMember) => m.userId);
     if (!memberIds.includes(fromUser) || !memberIds.includes(toUser)) {
       throw new AppError("Both users must be members of the group", 400);
     }
