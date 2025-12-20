@@ -90,7 +90,7 @@ npm run dev
 
 ---
 
-## STEP 🔟 Final Summary
+## Final Summary
 
 ```md
 ## Summary
